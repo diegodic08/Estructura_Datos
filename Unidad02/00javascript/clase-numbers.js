@@ -3,7 +3,7 @@
 
 const entero = 42
 const decimal = 4.14
-console.loc(typeof entero, typeof decimal)
+console.log(typeof entero, typeof decimal)
 
 //notación científica
 const cientifico = 5e3

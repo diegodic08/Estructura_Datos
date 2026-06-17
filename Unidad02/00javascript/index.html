@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio de Números</title>
+    <style>
+        body { font-family: sans-serif; margin: 30px; color: #333; background-color: #fff; }
+        h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }
+        section { margin-bottom: 30px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        h2 { margin-top: 0; color: #111; }
+        .flex { display: flex; gap: 15px; margin-bottom: 10px; }
+        .campo { flex: 1; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input { width: 100%; padding: 6px; box-sizing: border-box; font-family: monospace; border: 1px solid #999; border-radius: 4px; }
+        .resultado { background-color: #f4f4f4; padding: 10px; font-family: monospace; border-radius: 4px; margin-top: 10px; font-size: 14px; }
+        .destaque { font-weight: bold; color: #0066cc; }
+        .alerta { font-weight: bold; color: #cc0000; }
+        button { padding: 6px 12px; cursor: pointer; background: #eee; border: 1px solid #777; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #ddd; }
+    </style>
+</head>
+<body>
+
+    <h1> Laboratorio de Números (JS)</h1>
+    <p>Modifica los valores de los cuadros para ver los resultados calculados al instante.</p>
+
+    <section>
+        <h2>1. Tipos de Datos (typeof)</h2>
+        <div class="flex">
+            <div class="campo">
+                <label>Dato 1:</label>
+                <input type="text" id="inp-dato1">
+            </div>
+            <div class="campo">
+                <label>Dato 2:</label>
+                <input type="text" id="inp-dato2">
+            </div>
+        </div>
+        <div class="resultado">
+            <strong>Resultado:</strong> <span id="out-tipos"></span>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Operaciones Aritméticas</h2>
+        <div class="flex">
+            <div class="campo">
+                <label>Número A:</label>
+                <input type="number" id="inp-numA">
+            </div>
+            <div class="campo">
+                <label>Número B:</label>
+                <input type="number" id="inp-numB">
+            </div>
+        </div>
+        <div class="resultado">
+            • Suma (+): <span id="out-suma" class="destaque"></span><br>
+            • Resta (-): <span id="out-resta" class="destaque"></span><br>
+            • Multiplicación (*): <span id="out-multi" class="destaque"></span><br>
+            • División (/): <span id="out-div" class="destaque"></span><br>
+            • Módulo (%): <span id="out-modulo" class="destaque"></span>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. Precisión de Flotantes y .toFixed()</h2>
+        <div class="flex">
+            <div class="campo">
+                <label>Decimal 1:</label>
+                <input type="number" step="0.01" id="inp-dec1">
+            </div>
+            <div class="campo">
+                <label>Decimal 2:</label>
+                <input type="number" step="0.01" id="inp-dec2">
+            </div>
+            <div class="campo">
+                <label>Dígitos (.toFixed):</label>
+                <input type="number" min="0" max="20" id="inp-fixed-digits" value="1">
+            </div>
+        </div>
+        <div class="resultado">
+            • Resultado crudo de la suma: <span id="out-precision" class="alerta"></span><br>
+            • Resultado con .toFixed(): <span id="out-fixed" class="destaque"></span>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Funciones de Math</h2>
+        <div class="flex" style="align-items: flex-end;">
+            <div class="campo">
+                <label>Número para Raíz y Absoluto:</label>
+                <input type="number" id="inp-math">
+            </div>
+            <div>
+                <button onclick="calcularMathRandom()"> Generar Math.random()</button>
+            </div>
+        </div>
+        <div class="resultado">
+            • Math.sqrt() [Raíz]: <span id="out-raiz" class="destaque"></span><br>
+            • Math.abs() [Absoluto]: <span id="out-abs" class="destaque"></span><br>
+            • Math.random() [Aleatorio]: <span id="out-azar" class="destaque"></span>
+        </div>
+    </section>
+
+    <script src="clase-numbers.js"></script>
+
+    <script>
+        // Inicializar los inputs con las variables de tu clase-numbers.js
+        document.getElementById('inp-dato1').value = entero;
+        document.getElementById('inp-dato2').value = decimal;
+        
+        document.getElementById('inp-numA').value = 10; 
+        document.getElementById('inp-numB').value = 2;
+
+        document.getElementById('inp-dec1').value = 0.1;
+        document.getElementById('inp-dec2').value = 0.2;
+        
+        document.getElementById('inp-math').value = -16;
+
+        // Detectar tipo de dato de forma sencilla
+        function obtenerTipoDato(valor) {
+            if (valor.toLowerCase() === 'infinity') return 'number (Infinity)';
+            if (valor.toLowerCase() === 'nan') return 'number (NaN)';
+            if (!isNaN(valor) && valor.trim() !== "") return 'number';
+            return typeof valor;
+        }
+
+        // Función que calcula todo en tiempo real
+        function laboratorio() {
+            // 1. Tipos
+            const d1 = document.getElementById('inp-dato1').value;
+            const d2 = document.getElementById('inp-dato2').value;
+            document.getElementById('out-tipos').innerText = `Dato 1 es ${obtenerTipoDato(d1)} | Dato 2 es ${obtenerTipoDato(d2)}`;
+
+            // 2. Aritmética
+            const numA = parseFloat(document.getElementById('inp-numA').value) || 0;
+            const numB = parseFloat(document.getElementById('inp-numB').value) || 0;
+            
+            document.getElementById('out-suma').innerText = numA + numB;
+            document.getElementById('out-resta').innerText = numA - numB;
+            document.getElementById('out-multi').innerText = numA * numB;
+            document.getElementById('out-div').innerText = numB !== 0 ? (numA / numB) : 'Error (División entre 0)';
+            document.getElementById('out-modulo').innerText = numB !== 0 ? (numA % numB) : 'NaN';
+
+            // 3. Precisión
+            const dec1 = parseFloat(document.getElementById('inp-dec1').value) || 0;
+            const dec2 = parseFloat(document.getElementById('inp-dec2').value) || 0;
+            const digitos = parseInt(document.getElementById('inp-fixed-digits').value) || 0;
+            
+            const sumaPrecision = dec1 + dec2;
+            document.getElementById('out-precision').innerText = sumaPrecision;
+            document.getElementById('out-fixed').innerText = sumaPrecision.toFixed(digitos);
+
+            // 4. Math
+            const valorMath = parseFloat(document.getElementById('inp-math').value) || 0;
+            document.getElementById('out-raiz').innerText = valorMath >= 0 ? Math.sqrt(valorMath).toFixed(4) : 'NaN (Raíz de un negativo)';
+            document.getElementById('out-abs').innerText = Math.abs(valorMath);
+        }
+
+        // Función para el botón aleatorio
+        function calcularMathRandom() {
+            document.getElementById('out-azar').innerText = Math.random();
+        }
+
+        // Asignar el evento en tiempo real a todos los inputs
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(i => i.addEventListener('input', laboratorio));
+
+        // Carga inicial
+        laboratorio();
+        calcularMathRandom();
+    </script>
+</body>
+</html>
