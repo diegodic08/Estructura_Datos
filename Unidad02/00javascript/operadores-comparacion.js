@@ -52,3 +52,15 @@ console.log(a > 500 || c > 20)
 //NOT lógico
 console.log(!(a > 500)) 
 
+/*
+En clase
+*/
+
+const a = 10
+const b = 20
+const c = "30"
+
+a == b
+a === b
+a === c
+a == c
