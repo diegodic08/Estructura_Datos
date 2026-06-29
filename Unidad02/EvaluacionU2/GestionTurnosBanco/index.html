@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Turnos Bancarios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial;
+        }
+        body {
+            background: #eef2f5;
+        }
+        header {
+            background: #003366;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        section {
+            width: 90%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,.15);
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            padding: 12px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            background: #0057b8;
+            color: white;
+            border-radius: 5px;
+            transition: .3s;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #003f88;
+            transform: scale(1.05);
+        }
+        #resultado {
+            background: #fafafa;
+            border: 1px solid #ccc;
+            min-height: 250px;
+            padding: 20px;
+            overflow: auto;
+            white-space: pre-line;
+            border-radius: 6px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #003366;
+            color: white;
+            padding: 12px;
+        }
+        td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        tr:nth-child(even) {
+            background: #f4f4f4;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border: 2px solid #0057b8;
+        }
+        h2 {
+            margin-bottom: 12px;
+            color: #003366;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1> Sistema de Gestión de Turnos Bancarios</h1>
+    <p>Proyecto Final - Estructuras Lineales</p>
+</header>
+
+<!-- REGISTRO DE CLIENTES -->
+<section class="registro">
+    <h2>Registrar Cliente</h2>
+    <input type="number" id="turno" placeholder="Número de Turno">
+    <input type="text" id="nombre" placeholder="Nombre del Cliente">
+    <select id="tramite">
+        <option value="Depósito">Depósito</option>
+        <option value="Retiro">Retiro</option>
+        <option value="Pago">Pago</option>
+        <option value="Consulta">Consulta</option>
+        <option value="Crédito">Crédito</option>
+    </select>
+    <button onclick="registrarCliente()">Registrar Cliente</button>
+</section>
+
+<!-- OPERACIONES -->
+<section class="acciones">
+    <h2>Operaciones</h2>
+    <button onclick="mostrarCola()">Mostrar Cola (FIFO)</button>
+    <button onclick="siguienteCliente()">Siguiente Cliente</button>
+    <button onclick="atenderCliente()">Atender Cliente</button>
+    <button onclick="mostrarHistorial()">Historial</button>
+    <button onclick="mostrarEstadoCola()">Estado Cola Circular</button>
+</section>
+
+<!-- LIFO -->
+<section class="lifo">
+    <h2>Pila (LIFO)</h2>
+    <button onclick="mostrarPila()">Mostrar Pila</button>
+    <button onclick="compararFIFOvsLIFO()">Comparar FIFO vs LIFO</button>
+</section>
+
+<!-- ORDENAMIENTOS -->
+<section class="ordenamientos">
+    <h2>Algoritmos de Ordenamiento</h2>
+    <button onclick="ordenarBubble()">Bubble Sort</button>
+    <button onclick="ordenarInsertion()">Insertion Sort</button>
+    <button onclick="ordenarQuick()">Quick Sort</button>
+    <button onclick="ordenarMerge()">Merge Sort</button>
+</section>
+
+<!-- RECURSIVIDAD -->
+<section class="recursividad">
+    <h2>Recursividad</h2>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <input type="number" id="turnoBuscar" placeholder="Número de turno a buscar" style="margin:0;width:auto;flex:1;">
+        <button onclick="buscarTurno()" style="margin:0;white-space:nowrap;">Buscar Turno</button>
+    </div>
+    <button onclick="contarClientes()">Contar Clientes</button>
+</section>
+
+<!-- RESULTADOS -->
+<section>
+    <h2>Resultado del Sistema</h2>
+    <div id="resultado">Bienvenido al Sistema de Gestión de Turnos Bancarios.</div>
+</section>
+
+<footer>
+    <h3>Proyecto Final - Gestión de Turnos Bancarios</h3>
+    <p>Implementación de Cola Circular (FIFO), Pila (LIFO), Algoritmos de Ordenamiento y Recursividad utilizando JavaScript.</p>
+</footer>
+
+<script>
+/* =============================================
+   CLASE CLIENTE
+   ============================================= */
+class Cliente {
+    constructor(turno, nombre, tramite) {
+        this.turno = turno;
+        this.nombre = nombre;
+        this.tramite = tramite;
+        this.hora = new Date().toLocaleTimeString();
+    }
+    informacion() {
+        return `Turno: ${this.turno}<br>Cliente: ${this.nombre}<br>Trámite: ${this.tramite}<br>Hora: ${this.hora}`;
+    }
+}
+
+/* =============================================
+   CLASE COLA CIRCULAR
+   ============================================= */
+class ColaCircular {
+    constructor(capacidad = 20) {
+        this.capacidad = capacidad;
+        this.cola = new Array(capacidad);
+        this.front = -1;
+        this.rear = -1;
+    }
+    estaVacia() {
+        return this.front === -1;
+    }
+    estaLlena() {
+        return (
+            (this.front === 0 && this.rear === this.capacidad - 1) ||
+            (this.rear + 1) % this.capacidad === this.front
+        );
+    }
+    encolar(cliente) {
+        if (this.estaLlena()) return false;
+        if (this.estaVacia()) {
+            this.front = 0;
+            this.rear = 0;
+        } else {
+            this.rear = (this.rear + 1) % this.capacidad;
+        }
+        this.cola[this.rear] = cliente;
+        return true;
+    }
+    desencolar() {
+        if (this.estaVacia()) return null;
+        const cliente = this.cola[this.front];
+        this.cola[this.front] = null;
+        if (this.front === this.rear) {
+            this.front = -1;
+            this.rear = -1;
+        } else {
+            this.front = (this.front + 1) % this.capacidad;
+        }
+        return cliente;
+    }
+    frente() {
+        if (this.estaVacia()) return null;
+        return this.cola[this.front];
+    }
+    tamaño() {
+        if (this.estaVacia()) return 0;
+        if (this.rear >= this.front) return this.rear - this.front + 1;
+        return this.capacidad - this.front + this.rear + 1;
+    }
+    obtenerElementos() {
+        let elementos = [];
+        if (this.estaVacia()) return elementos;
+        let i = this.front;
+        while (true) {
+            elementos.push(this.cola[i]);
+            if (i === this.rear) break;
+            i = (i + 1) % this.capacidad;
+        }
+        return elementos;
+    }
+    limpiar() {
+        this.cola = new Array(this.capacidad);
+        this.front = -1;
+        this.rear = -1;
+    }
+    estadoInterno() {
+        return {
+            front: this.front,
+            rear: this.rear,
+            capacidad: this.capacidad,
+            ocupados: this.tamaño()
+        };
+    }
+}
+
+/* =============================================
+   CLASE PILA (LIFO)
+   ============================================= */
+class Pila {
+    constructor(capacidad = 20) {
+        this.capacidad = capacidad;
+        this.elementos = [];
+        this.tope = -1;
+    }
+    estaVacia() {
+        return this.tope === -1;
+    }
+    estaLlena() {
+        return this.tope === this.capacidad - 1;
+    }
+    push(cliente) {
+        if (this.estaLlena()) return false;
+        this.tope++;
+        this.elementos[this.tope] = cliente;
+        return true;
+    }
+    pop() {
+        if (this.estaVacia()) return null;
+        const cliente = this.elementos[this.tope];
+        this.elementos.splice(this.tope, 1);
+        this.tope--;
+        return cliente;
+    }
+    peek() {
+        if (this.estaVacia()) return null;
+        return this.elementos[this.tope];
+    }
+    tamaño() {
+        return this.tope + 1;
+    }
+    obtenerElementos() {
+        return [...this.elementos];
+    }
+    limpiar() {
+        this.elementos = [];
+        this.tope = -1;
+    }
+}
+
+/* =============================================
+   ALGORITMOS DE ORDENAMIENTO
+   ============================================= */
+
+// Bubble Sort — O(n²)
+function bubbleSort(clientes) {
+    let arreglo = [...clientes];
+    const n = arreglo.length;
+    for (let i = 0; i < n - 1; i++) {
+        let intercambio = false;
+        for (let j = 0; j < n - i - 1; j++) {
+            if (arreglo[j].turno > arreglo[j + 1].turno) {
+                let aux = arreglo[j];
+                arreglo[j] = arreglo[j + 1];
+                arreglo[j + 1] = aux;
+                intercambio = true;
+            }
+        }
+        if (!intercambio) break;
+    }
+    return arreglo;
+}
+
+// Insertion Sort — O(n²)
+function insertionSort(clientes) {
+    let arreglo = [...clientes];
+    for (let i = 1; i < arreglo.length; i++) {
+        let actual = arreglo[i];
+        let j = i - 1;
+        while (j >= 0 && arreglo[j].turno > actual.turno) {
+            arreglo[j + 1] = arreglo[j];
+            j--;
+        }
+        arreglo[j + 1] = actual;
+    }
+    return arreglo;
+}
+
+// Quick Sort — O(n log n) promedio
+function quickSort(clientes) {
+    if (clientes.length <= 1) return clientes;
+    let pivote = clientes[clientes.length - 1];
+    let menores = [];
+    let mayores = [];
+    for (let i = 0; i < clientes.length - 1; i++) {
+        if (clientes[i].turno < pivote.turno) {
+            menores.push(clientes[i]);
+        } else {
+            mayores.push(clientes[i]);
+        }
+    }
+    return [...quickSort(menores), pivote, ...quickSort(mayores)];
+}
+
+// Merge Sort — O(n log n)
+function mergeSort(clientes) {
+    if (clientes.length <= 1) return clientes;
+    const mitad = Math.floor(clientes.length / 2);
+    const izquierda = mergeSort(clientes.slice(0, mitad));
+    const derecha = mergeSort(clientes.slice(mitad));
+    return combinar(izquierda, derecha);
+}
+function combinar(izquierda, derecha) {
+    let resultado = [];
+    let i = 0, j = 0;
+    while (i < izquierda.length && j < derecha.length) {
+        if (izquierda[i].turno < derecha[j].turno) {
+            resultado.push(izquierda[i++]);
+        } else {
+            resultado.push(derecha[j++]);
+        }
+    }
+    while (i < izquierda.length) resultado.push(izquierda[i++]);
+    while (j < derecha.length) resultado.push(derecha[j++]);
+    return resultado;
+}
+
+/* =============================================
+   RECURSIVIDAD
+   ============================================= */
+
+function busquedaRecursiva(clientes, turno, indice = 0) {
+    if (indice >= clientes.length) return null;
+    if (clientes[indice].turno == turno) return clientes[indice];
+    return busquedaRecursiva(clientes, turno, indice + 1);
+}
+
+function contarClientesRecursivo(clientes, indice = 0) {
+    if (indice >= clientes.length) return 0;
+    return 1 + contarClientesRecursivo(clientes, indice + 1);
+}
+
+/* =============================================
+   ESTRUCTURAS PRINCIPALES
+   ============================================= */
+const cola = new ColaCircular(20);
+const historial = [];
+const pilaDemostracion = new Pila(20);
+
+/* =============================================
+   UTILIDADES DE DISPLAY
+   ============================================= */
+function limpiarResultado() {
+    document.getElementById("resultado").innerHTML = "";
+}
+function imprimir(texto) {
+    document.getElementById("resultado").innerHTML += texto + "<br>";
+}
+function separador() {
+    imprimir("------------------------------------------");
+}
+
+/* =============================================
+   REGISTRO DE CLIENTES
+   ============================================= */
+function existeTurno(turno) {
+    const clientes = cola.obtenerElementos();
+    for (let cliente of clientes) {
+        if (cliente.turno == turno) return true;
+    }
+    return false;
+}
+
+function registrarCliente() {
+    const turno = parseInt(document.getElementById("turno").value);
+    const nombre = document.getElementById("nombre").value.trim();
+    const tramite = document.getElementById("tramite").value;
+
+    if (isNaN(turno) || nombre === "") {
+        alert("Complete todos los campos.");
+        return;
+    }
+    if (existeTurno(turno)) {
+        alert("Ya existe un cliente con ese número de turno.");
+        return;
+    }
+
+    const cliente = new Cliente(turno, nombre, tramite);
+
+    if (cola.encolar(cliente)) {
+        pilaDemostracion.push(cliente);
+        document.getElementById("turno").value = "";
+        document.getElementById("nombre").value = "";
+        mostrarCola();
+        limpiarResultado();
+        imprimir("<strong> Cliente registrado correctamente.</strong>");
+        imprimir("");
+        mostrarCola();
+    } else {
+        alert("La cola está llena.");
+    }
+}
+
+/* =============================================
+   OPERACIONES — COLA FIFO
+   ============================================= */
+function mostrarCola() {
+    limpiarResultado();
+    const clientes = cola.obtenerElementos();
+    if (clientes.length === 0) {
+        imprimir("No existen clientes en espera.");
+        return;
+    }
+    let html = `<h2>Clientes en Espera (FIFO)</h2>
+    <table>
+        <tr><th>Turno</th><th>Nombre</th><th>Trámite</th><th>Hora</th></tr>`;
+    clientes.forEach(c => {
+        html += `<tr><td>${c.turno}</td><td>${c.nombre}</td><td>${c.tramite}</td><td>${c.hora}</td></tr>`;
+    });
+    html += "</table>";
+    document.getElementById("resultado").innerHTML = html;
+}
+
+function siguienteCliente() {
+    limpiarResultado();
+    const cliente = cola.frente();
+    if (cliente == null) {
+        imprimir("No existen clientes en espera.");
+        return;
+    }
+    imprimir("<h2>SIGUIENTE CLIENTE</h2>");
+    imprimir(cliente.informacion());
+}
+
+function atenderCliente() {
+    const cliente = cola.desencolar();
+    if (cliente == null) {
+        alert("No existen clientes en la cola.");
+        return;
+    }
+    historial.push(cliente);
+    limpiarResultado();
+    imprimir("<h2> CLIENTE ATENDIDO</h2>");
+    imprimir(cliente.informacion());
+    separador();
+    imprimir("El cliente ha sido removido de la cola y agregado al historial.");
+}
+
+function mostrarHistorial() {
+    limpiarResultado();
+    imprimir("<h2>HISTORIAL DE CLIENTES ATENDIDOS</h2>");
+    if (historial.length === 0) {
+        imprimir("Todavía no se ha atendido ningún cliente.");
+        return;
+    }
+    let html = `<table>
+        <tr><th>#</th><th>Turno</th><th>Nombre</th><th>Trámite</th><th>Hora</th></tr>`;
+    historial.forEach((c, idx) => {
+        html += `<tr><td>${idx + 1}</td><td>${c.turno}</td><td>${c.nombre}</td><td>${c.tramite}</td><td>${c.hora}</td></tr>`;
+    });
+    html += "</table>";
+    document.getElementById("resultado").innerHTML = "<h2>HISTORIAL DE CLIENTES ATENDIDOS</h2>" + html;
+}
+
+function mostrarEstadoCola() {
+    limpiarResultado();
+    const estado = cola.estadoInterno();
+    imprimir("<h2>ESTADO DE LA COLA CIRCULAR</h2>");
+    imprimir("Front : " + estado.front);
+    imprimir("Rear : " + estado.rear);
+    imprimir("Capacidad : " + estado.capacidad);
+    imprimir("Clientes en espera : " + estado.ocupados);
+    imprimir("¿Vacía? : " + cola.estaVacia());
+    imprimir("¿Llena? : " + cola.estaLlena());
+}
+
+/* =============================================
+   PILA LIFO
+   ============================================= */
+function mostrarPila() {
+    limpiarResultado();
+    imprimir("<h2>PILA (LIFO) — Último en entrar, primero en salir</h2>");
+    const elementos = pilaDemostracion.obtenerElementos();
+    if (elementos.length === 0) {
+        imprimir("La pila está vacía.");
+        return;
+    }
+    let html = `<table>
+        <tr><th>Posición</th><th>Turno</th><th>Nombre</th><th>Trámite</th></tr>`;
+    for (let i = elementos.length - 1; i >= 0; i--) {
+        const etiqueta = i === elementos.length - 1 ? " ← TOPE" : "";
+        html += `<tr><td>${elementos.length - i}${etiqueta}</td><td>${elementos[i].turno}</td><td>${elementos[i].nombre}</td><td>${elementos[i].tramite}</td></tr>`;
+    }
+    html += "</table>";
+    document.getElementById("resultado").innerHTML = "<h2>PILA (LIFO)</h2>" + html + "<br>El último cliente registrado aparece primero (TOPE).";
+}
+
+function compararFIFOvsLIFO() {
+    limpiarResultado();
+    imprimir("<h2>COMPARACIÓN FIFO vs LIFO</h2>");
+
+    const fifo = cola.obtenerElementos();
+    const pila = pilaDemostracion.obtenerElementos();
+
+    let html = `<table>
+        <tr><th>#</th><th>FIFO — Cola (primero en llegar)</th><th>LIFO — Pila (último en llegar)</th></tr>`;
+    const max = Math.max(fifo.length, pila.length);
+    for (let i = 0; i < max; i++) {
+        const f = fifo[i] ? `T${fifo[i].turno} - ${fifo[i].nombre}` : "—";
+        const l = pila[max - 1 - i] ? `T${pila[max - 1 - i].turno} - ${pila[max - 1 - i].nombre}` : "—";
+        html += `<tr><td>${i + 1}</td><td>${f}</td><td>${l}</td></tr>`;
+    }
+    html += "</table>";
+    document.getElementById("resultado").innerHTML = "<h2>COMPARACIÓN FIFO vs LIFO</h2>" + html;
+}
+
+/* =============================================
+   ALGORITMOS DE ORDENAMIENTO
+   ============================================= */
+
+// Mide el tiempo de un algoritmo ejecutándolo N veces para mayor precisión
+function medirTiempo(fn, datos, repeticiones = 500) {
+    const inicio = performance.now();
+    let resultado;
+    for (let i = 0; i < repeticiones; i++) {
+        resultado = fn([...datos]);
+    }
+    const fin = performance.now();
+    return {
+        resultado,
+        tiempo: (fin - inicio) / repeticiones
+    };
+}
+
+function mostrarOrdenadosConTiempo(algoritmoActivo, todos) {
+    limpiarResultado();
+
+    const algoritmos = [
+        { nombre: "Bubble Sort",    fn: bubbleSort,    complejidad: "O(n²)",      color: "#e74c3c" },
+        { nombre: "Insertion Sort", fn: insertionSort, complejidad: "O(n²)",      color: "#e67e22" },
+        { nombre: "Quick Sort",     fn: quickSort,     complejidad: "O(n log n)", color: "#27ae60" },
+        { nombre: "Merge Sort",     fn: mergeSort,     complejidad: "O(n log n)", color: "#2980b9" }
+    ];
+
+    // Medir todos
+    const resultados = algoritmos.map(a => {
+        const { resultado, tiempo } = medirTiempo(a.fn, todos);
+        return { ...a, tiempo, resultado };
+    });
+
+    // El más rápido para calcular barras relativas
+    const minTiempo = Math.min(...resultados.map(r => r.tiempo));
+    const maxTiempo = Math.max(...resultados.map(r => r.tiempo));
+
+    // Resultado ordenado del algoritmo activo
+    const activo = resultados.find(r => r.nombre === algoritmoActivo);
+
+    // Tabla de resultados ordenados
+    let tablaResultados = `
+    <table>
+        <tr><th>Posición</th><th>Turno</th><th>Nombre</th><th>Trámite</th></tr>`;
+    activo.resultado.forEach((c, idx) => {
+        tablaResultados += `<tr><td>${idx + 1}</td><td>${c.turno}</td><td>${c.nombre}</td><td>${c.tramite}</td></tr>`;
+    });
+    tablaResultados += "</table>";
+
+    // Panel de comparación de tiempos
+    let barras = "";
+    resultados.forEach(r => {
+        const esActivo = r.nombre === algoritmoActivo;
+        const pct = maxTiempo > 0 ? Math.max(4, (r.tiempo / maxTiempo) * 100) : 4;
+        const msText = r.tiempo < 0.001 ? "< 0.001 ms" : r.tiempo.toFixed(4) + " ms";
+        const badge = esActivo ? `<span style="background:#003366;color:white;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;">Seleccionado</span>` : "";
+        const masRapido = r.tiempo === minTiempo ? `<span style="background:#27ae60;color:white;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;">⚡ Más rápido</span>` : "";
+        barras += `
+        <div style="margin:10px 0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-weight:${esActivo ? 'bold' : 'normal'};font-size:14px;">
+                    ${r.nombre} <span style="color:#888;font-size:12px;">${r.complejidad}</span>${badge}${masRapido}
+                </span>
+                <span style="font-family:monospace;font-size:13px;color:#333;">${msText}</span>
+            </div>
+            <div style="background:#e9ecef;border-radius:6px;height:22px;overflow:hidden;">
+                <div style="width:${pct}%;background:${r.color};height:100%;border-radius:6px;transition:width 0.4s;display:flex;align-items:center;padding-left:6px;">
+                    ${pct > 15 ? `<span style="color:white;font-size:11px;">${msText}</span>` : ""}
+                </div>
+            </div>
+        </div>`;
+    });
+
+    const n = todos.length;
+    document.getElementById("resultado").innerHTML = `
+        <h2>Resultado — ${algoritmoActivo}</h2>
+        <div style="background:#f0f4ff;border:1px solid #c5d3f0;border-radius:8px;padding:16px;margin-bottom:18px;">
+            <div style="font-weight:bold;font-size:15px;color:#003366;margin-bottom:12px;">
+                ⏱ Comparación de Tiempos — ${n} cliente${n !== 1 ? 's' : ''} (promedio de 500 ejecuciones)
+            </div>
+            ${barras}
+            <div style="font-size:12px;color:#888;margin-top:10px;">
+                * Los tiempos son muy pequeños con pocos datos. Con miles de elementos, la diferencia entre O(n²) y O(n log n) sería mucho más notable.
+            </div>
+        </div>
+        <h3 style="margin-bottom:8px;">Clientes ordenados por número de turno (${algoritmoActivo})</h3>
+        ${tablaResultados}
+    `;
+}
+
+function ordenarBubble() {
+    const todos = [...cola.obtenerElementos(), ...historial];
+    if (todos.length === 0) { limpiarResultado(); imprimir("No hay clientes registrados para ordenar."); return; }
+    mostrarOrdenadosConTiempo("Bubble Sort", todos);
+}
+
+function ordenarInsertion() {
+    const todos = [...cola.obtenerElementos(), ...historial];
+    if (todos.length === 0) { limpiarResultado(); imprimir("No hay clientes registrados para ordenar."); return; }
+    mostrarOrdenadosConTiempo("Insertion Sort", todos);
+}
+
+function ordenarQuick() {
+    const todos = [...cola.obtenerElementos(), ...historial];
+    if (todos.length === 0) { limpiarResultado(); imprimir("No hay clientes registrados para ordenar."); return; }
+    mostrarOrdenadosConTiempo("Quick Sort", todos);
+}
+
+function ordenarMerge() {
+    const todos = [...cola.obtenerElementos(), ...historial];
+    if (todos.length === 0) { limpiarResultado(); imprimir("No hay clientes registrados para ordenar."); return; }
+    mostrarOrdenadosConTiempo("Merge Sort", todos);
+}
+
+/* =============================================
+   RECURSIVIDAD
+   ============================================= */
+function buscarTurno() {
+    const input = document.getElementById("turnoBuscar").value.trim();
+    if (input === "") {
+        alert("Ingrese un número de turno.");
+        return;
+    }
+    const turno = parseInt(input);
+    if (isNaN(turno)) {
+        alert("Ingrese un número válido.");
+        return;
+    }
+    const clientes = cola.obtenerElementos();
+    const encontrado = busquedaRecursiva(clientes, turno);
+    limpiarResultado();
+    imprimir("<h2>BÚSQUEDA RECURSIVA</h2>");
+    imprimir("Turno buscado: " + turno);
+    separador();
+    if (encontrado == null) {
+        imprimir(" Cliente no encontrado en la cola.");
+    } else {
+        imprimir(" CLIENTE ENCONTRADO");
+        imprimir(encontrado.informacion());
+    }
+}
+
+function contarClientes() {
+    limpiarResultado();
+    const clientes = cola.obtenerElementos();
+    const total = contarClientesRecursivo(clientes);
+    imprimir("<h2>CONTEO RECURSIVO DE CLIENTES</h2>");
+    imprimir("Total de clientes en espera: <strong>" + total + "</strong>");
+    imprimir("Total de clientes atendidos (historial): <strong>" + historial.length + "</strong>");
+    imprimir("Total general: <strong>" + (total + historial.length) + "</strong>");
+}
+</script>
+</body>
+</html>
